@@ -49,21 +49,21 @@ Cars images are gotten from "assets/images/veh/{carname}/{fileName}"
 ```
 ## File Structure
 ```plaintext
-assets/
 ├── index.html
-├── game.js
-├── styles.css
-└── assets/
-    ├── data/
-        └── cars.json
-    └── images/
-        ├── veh/
-            ├── smoke.png
-            ├── tesla/
-                ├── body.png
-                └── wheel.png
-            └── mtruck/
-                ├── body.png
-                ├── wheel_r.png
-                └── wheel_f.png
+    assets/
+        ├── game.js
+        ├── styles.css
+        └── assets/
+            ├── data/
+            └── cars.json
+        └── images/
+            ├── veh/
+                ├── smoke.png
+                ├── tesla/
+                    ├── body.png
+                    └── wheel.png
+                └── mtruck/
+                    ├── body.png
+                    ├── wheel_r.png
+                    └── wheel_f.png
 ```
