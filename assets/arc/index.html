@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Car Simulation with Vehicle Selection</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: #e0e0e0;
+        }
+        #vehicleSelector {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        #vehicleSelector select {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="vehicleSelector">
+    <label for="vehicleSelect">Choose your vehicle:</label>
+    <select id="vehicleSelect">
+        <option value="car">Car</option>
+        <option value="mtruck">Monster Truck</option>
+    </select>
+</div>
+<canvas id="simulationCanvas"></canvas>
+<script>
+    const canvas = document.getElementById('simulationCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Car data from JSON
+    const carData = {
+        car: {
+            name: "Car",
+            drivetrain: "RWD",
+            body: {
+                image: "body.png",
+                position: "25,20",
+                scale: "357,106",
+            },
+            rearwheel: {
+                image: "wheel.png",
+                position: "68,79",
+                scale: "53,53"
+            },
+            frontwheel: {
+                image: "wheel.png",
+                position: "297,79",
+                scale: "53,53"
+            }
+        },
+        mtruck: {
+            name: "Monster Truck",
+            drivetrain: "AWD",
+            body: {
+                image: "body.png",
+                position: "399,224",
+                scale: "800,450",
+            },
+            rearwheel: {
+                image: "wheel_r.png",
+                position: "68,79",
+                scale: "250,246"
+            },
+            frontwheel: {
+                image: "wheel_f.png",
+                position: "297,79",
+                scale: "250,246"
+            }
+        },
+    };
+
+    let currentCar = 'car'; // Default car
+    const carConfig = carData[currentCar];
+
+    const carWidth = parseInt(carConfig.body.scale.split(',')[0]);
+    const carHeight = parseInt(carConfig.body.scale.split(',')[1]);
+    const rearWheelScale = parseInt(carConfig.rearwheel.scale.split(',')[0]);
+    const frontWheelScale = parseInt(carConfig.frontwheel.scale.split(',')[0]);
+
+    const car = {
+        x: canvas.width / 2 - carWidth / 2,
+        y: canvas.height / 2 - carHeight / 2,
+        speed: 0,
+        acceleration: 0.1,
+        brakingForce: 0.05,
+        maxSpeed: 5,
+        gravity: 0.5,
+        verticalVelocity: 0,
+        onGround: false,
+        wheelRotation: 0,
+    };
+
+    const loadImage = (src) => {
+        const img = new Image();
+        img.src = src;
+        return img;
+    };
+
+    const bodyImage = loadImage(`images/${carConfig.name}/${carConfig.body.image}`);
+    const rearWheelImage = loadImage(`images/${carConfig.name}/${carConfig.rearwheel.image}`);
+    const frontWheelImage = loadImage(`images/${carConfig.name}/${carConfig.frontwheel.image}`);
+
+    const groundY = canvas.height - 50;
+    const groundHeight = 50;
+
+    const keys = { d: false, a: false };
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'd') keys.d = true;
+        if (e.key === 'a') keys.a = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.key === 'd') keys.d = false;
+        if (e.key === 'a') keys.a = false;
+    });
+
+    document.getElementById('vehicleSelect').addEventListener('change', (e) => {
+        currentCar = e.target.value;
+        updateCarConfig();
+    });
+
+    const updateCarConfig = () => {
+        const carConfig = carData[currentCar];
+        car.x = canvas.width / 2 - parseInt(carConfig.body.scale.split(',')[0]) / 2;
+        car.y = canvas.height / 2 - parseInt(carConfig.body.scale.split(',')[1]) / 2;
+        car.speed = 0; // Reset speed when changing vehicle
+        car.wheelRotation = 0; // Reset wheel rotation
+        // Reload images
+        bodyImage.src = `images/${carConfig.name}/${carConfig.body.image}`;
+        rearWheelImage.src = `images/${carConfig.name}/${carConfig.rearwheel.image}`;
+        frontWheelImage.src = `images/${carConfig.name}/${carConfig.frontwheel.image}`;
+    };
+
+    function update() {
+        // Gravity and ground collision handling (same as before)
+        if (!car.onGround) {
+            car.verticalVelocity += car.gravity;
+            car.y += car.verticalVelocity;
+        }
+
+        if (car.y + carHeight >= groundY) {
+            car.y = groundY - carHeight;
+            car.verticalVelocity = 0;
+            car.onGround = true;
+        } else {
+            car.onGround = false;
+        }
+
+        const rearWheelY = car.y + parseInt(carConfig.rearwheel.position.split(',')[1]);
+        const frontWheelY = car.y + parseInt(carConfig.frontwheel.position.split(',')[1]);
+
+        const rearWheelGroundCollision = rearWheelY + rearWheelScale >= groundY;
+        const frontWheelGroundCollision = frontWheelY + frontWheelScale >= groundY;
+
+        if (rearWheelGroundCollision) {
+            car.verticalVelocity = 0;
+            car.y = groundY - rearWheelScale - parseInt(carConfig.rearwheel.position.split(',')[1]);
+        }
+
+        if (frontWheelGroundCollision) {
+            car.verticalVelocity = 0;
+            car.y = groundY - frontWheelScale - parseInt(carConfig.frontwheel.position.split(',')[1]);
+        }
+
+        if (keys.d && car.speed < car.maxSpeed) {
+            car.speed += car.acceleration;
+        } else if (keys.a && car.speed > -car.maxSpeed) {
+            car.speed -= car.acceleration;
+        } else {
+            if (car.speed > 0) {
+                car.speed -= car.brakingForce;
+            } else if (car.speed < 0) {
+                car.speed += car.brakingForce;
+            }
+        }
+
+        car.x += car.speed;
+
+        let wheelSpeed = car.speed / rearWheelScale;
+
+        if (carConfig.drivetrain === "RWD") {
+            if (rearWheelGroundCollision) {
+                car.wheelRotation += wheelSpeed;
+            }
+            if (frontWheelGroundCollision) {
+                car.wheelRotation *= 0.95;
+            }
+        } else if (carConfig.drivetrain === "FWD") {
+            if (frontWheelGroundCollision) {
+                car.wheelRotation += wheelSpeed;
+            }
+            if (rearWheelGroundCollision) {
+                car.wheelRotation *= 0.95;
+            }
+        } else if (carConfig.drivetrain === "AWD") {
+            if (rearWheelGroundCollision) {
+                car.wheelRotation += wheelSpeed;
+            }
+            if (frontWheelGroundCollision) {
+                car.wheelRotation += wheelSpeed;
+            }
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#8B4513";
+        ctx.fillRect(0, groundY, canvas.width, groundHeight);
+
+        ctx.drawImage(bodyImage, car.x + parseInt(carConfig.body.position.split(',')[0]), car.y + parseInt(carConfig.body.position.split(',')[1]), carWidth, carHeight);
+
+        ctx.save();
+        ctx.translate(car.x + parseInt(carConfig.rearwheel.position.split(',')[0]) + rearWheelScale / 2, car.y + parseInt(carConfig.rearwheel.position.split(',')[1]) + rearWheelScale / 2);
+        ctx.rotate(car.wheelRotation);
+        ctx.drawImage(rearWheelImage, -rearWheelScale / 2, -rearWheelScale / 2, rearWheelScale, rearWheelScale);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(car.x + parseInt(carConfig.frontwheel.position.split(',')[0]) + frontWheelScale / 2, car.y + parseInt(carConfig.frontwheel.position.split(',')[1]) + frontWheelScale / 2);
+        ctx.rotate(car.wheelRotation);
+        ctx.drawImage(frontWheelImage, -frontWheelScale / 2, -frontWheelScale / 2, frontWheelScale, frontWheelScale);
+        ctx.restore();
+    }
+
+    function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+</script>
+</body>
+</html>

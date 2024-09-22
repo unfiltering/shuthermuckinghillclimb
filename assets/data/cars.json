@@ -1,0 +1,40 @@
+{
+  "carData": {
+    "car": {
+      "name": "tesla",
+      "drivetrain": "RWD",
+      "body": {
+        "image": "body.png",
+        "scale": "357,106"
+      },
+      "rearwheel": {
+        "image": "wheel.png",
+        "position": "68,79",
+        "scale": "53,53"
+      },
+      "frontwheel": {
+        "image": "wheel.png",
+        "position": "297,79",
+        "scale": "53,53"
+      }
+    },
+    "mtruck": {
+      "name": "mtruck",
+      "drivetrain": "AWD",
+      "body": {
+        "image": "body.png",
+        "scale": "357,106"
+      },
+      "rearwheel": {
+        "image": "wheel_r.png",
+        "position": "68,79",
+        "scale": "53,53"
+      },
+      "frontwheel": {
+        "image": "wheel_f.png",
+        "position": "297,79",
+        "scale": "53,53"
+      }
+    }
+  }
+}
