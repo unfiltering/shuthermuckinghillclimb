@@ -1,13 +1,10 @@
 ## Instruction
-Make me a 2D car simulation game in HTML, CSS, and JS with the following resources below.
+Make me a 2D physics based car simulation game in HTML, CSS, and JS with the following resources below.
 Have the HTML, CSS, and JS in one file.
 ### Controls
 - A/D : Reverse/Accelerate
 ### Features
-- Make the car able to do burnouts by holding both keys at the same time
-- Make the car emit smoke particles using a random smoke image --> "assets/images/veh/smoke{1,2,3}.png"
-- Make sure the car doesnt emit the same smoke particle twice in a row
-- Make the particles emit from the car's tireSmokePos
+- Make each car dynamically fetch it's own images and parts based off their config
 ## Info
 - The cars data is gotten from "assets/data/cars.json"
 - Cars images are gotten from "assets/images/veh/{carname}/{fileName}"
