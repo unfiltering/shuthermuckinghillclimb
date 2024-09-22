@@ -1,6 +1,6 @@
 {
     "carData": {
-        "car": {
+        "tesla": {
             "name": "tesla",
             "drivetrain": "RWD",
             "body": {
