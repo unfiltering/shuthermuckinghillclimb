@@ -3,190 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D Car Simulation</title>
+    <title>2D Car Physics Game</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #d3d3d3;
         }
+
         canvas {
             display: block;
-            background-color: #cccccc;
         }
     </style>
 </head>
 <body>
+    <canvas id="gameCanvas"></canvas>
 
-<canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
-<script>
-    // Canvas setup
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    let carData;
-    let currentCar = null;
-
-    let keys = { A: false, D: false };
-    let velocity = 0;
-    const maxSpeed = 5;
-    const friction = 0.05;
-    let burnout = false;
-
-    // Smoke particles
-    const smokeImages = ["assets/images/veh/smoke1.png", "assets/images/veh/smoke2.png", "assets/images/veh/smoke3.png"];
-    let lastSmokeImage = null;
-    const smokeParticles = [];
-
-    // Load car data from JSON
-    async function loadCarData() {
-        const response = await fetch('assets/data/cars.json');
-        carData = await response.json();
-        loadCar(carData.carData.car); // Load the first car (Tesla)
-    }
-
-    // Load car parts dynamically
-    function loadCar(car) {
-        currentCar = {
-            name: car.name,
-            drivetrain: car.drivetrain,
-            tireSmokePos: car.tireSmokePos ? car.tireSmokePos.split(',').map(Number) : [0, 0],
-            body: new Image(),
-            rearwheel: new Image(),
-            frontwheel: new Image(),
-            bodyScale: car.body.scale.split(',').map(Number),
-            rearwheelPos: car.rearwheel.position.split(',').map(Number),
-            frontwheelPos: car.frontwheel.position.split(',').map(Number),
-            wheelScale: car.rearwheel.scale.split(',').map(Number)
+        const keys = {
+            left: false,
+            right: false,
         };
 
-        currentCar.body.src = `assets/images/veh/${car.name}/${car.body.image}`;
-        currentCar.rearwheel.src = `assets/images/veh/${car.name}/${car.rearwheel.image}`;
-        currentCar.frontwheel.src = `assets/images/veh/${car.name}/${car.frontwheel.image}`;
-    }
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "a" || e.key === "A") keys.left = true;
+            if (e.key === "d" || e.key === "D") keys.right = true;
+        });
 
-    // Smoke particle class
-    class SmokeParticle {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.image = getRandomSmokeImage();
-            this.alpha = 1;
-            this.size = Math.random() * 20 + 20;
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "a" || e.key === "A") keys.left = false;
+            if (e.key === "d" || e.key === "D") keys.right = false;
+        });
+
+        const carDataUrl = "assets/data/cars.json";
+        let carConfigs = null;
+        let currentCar = null;
+        let carPartsImages = {};
+
+        function loadCarConfig(carName) {
+            fetch(carDataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    carConfigs = data.carData;
+                    currentCar = carConfigs[carName];
+                    loadCarImages();
+                });
         }
 
-        update() {
-            this.y -= 1;
-            this.alpha -= 0.02;
-            if (this.alpha <= 0) {
-                const index = smokeParticles.indexOf(this);
-                smokeParticles.splice(index, 1);
+        function loadCarImages() {
+            const carName = currentCar.name;
+            carPartsImages.body = new Image();
+            carPartsImages.body.src = `assets/images/veh/${carName}/${currentCar.body.image}`;
+
+            carPartsImages.rearwheel = new Image();
+            carPartsImages.rearwheel.src = `assets/images/veh/${carName}/${currentCar.rearwheel.image}`;
+
+            carPartsImages.frontwheel = new Image();
+            carPartsImages.frontwheel.src = `assets/images/veh/${carName}/${currentCar.frontwheel.image}`;
+        }
+
+        let car = {
+            x: 200,
+            y: 300,
+            speed: 0,
+            acceleration: 0.05,
+            maxSpeed: 5,
+            friction: 0.01,
+            width: 100,
+            height: 50,
+        };
+
+        function drawCar() {
+            if (!currentCar || !carPartsImages.body.complete) return;
+            
+            const bodyPos = { x: car.x, y: car.y };
+            const rearWheelPos = { 
+                x: car.x + parseInt(currentCar.rearwheel.position.split(",")[0]),
+                y: car.y + parseInt(currentCar.rearwheel.position.split(",")[1])
+            };
+            const frontWheelPos = {
+                x: car.x + parseInt(currentCar.frontwheel.position.split(",")[0]),
+                y: car.y + parseInt(currentCar.frontwheel.position.split(",")[1])
+            };
+
+            const bodyScale = currentCar.body.scale.split(",");
+            const rearWheelScale = currentCar.rearwheel.scale.split(",");
+            const frontWheelScale = currentCar.frontwheel.scale.split(",");
+
+            // Draw Body
+            ctx.drawImage(carPartsImages.body, bodyPos.x, bodyPos.y, parseInt(bodyScale[0]), parseInt(bodyScale[1]));
+
+            // Draw Rear Wheel
+            ctx.drawImage(carPartsImages.rearwheel, rearWheelPos.x, rearWheelPos.y, parseInt(rearWheelScale[0]), parseInt(rearWheelScale[1]));
+
+            // Draw Front Wheel
+            ctx.drawImage(carPartsImages.frontwheel, frontWheelPos.x, frontWheelPos.y, parseInt(frontWheelScale[0]), parseInt(frontWheelScale[1]));
+        }
+
+        function updateCar() {
+            if (keys.left) {
+                car.speed -= car.acceleration;
             }
+            if (keys.right) {
+                car.speed += car.acceleration;
+            }
+
+            if (car.speed > car.maxSpeed) car.speed = car.maxSpeed;
+            if (car.speed < -car.maxSpeed) car.speed = -car.maxSpeed;
+
+            car.speed *= 1 - car.friction; // Apply friction
+            car.x += car.speed;
         }
 
-        draw() {
-            ctx.globalAlpha = this.alpha;
-            const img = new Image();
-            img.src = this.image;
-            ctx.drawImage(img, this.x, this.y, this.size, this.size);
-            ctx.globalAlpha = 1;
-        }
-    }
-
-    // Get random smoke image, ensuring no repeats
-    function getRandomSmokeImage() {
-        let newSmokeImage;
-        do {
-            newSmokeImage = smokeImages[Math.floor(Math.random() * smokeImages.length)];
-        } while (newSmokeImage === lastSmokeImage);
-        lastSmokeImage = newSmokeImage;
-        return newSmokeImage;
-    }
-
-    // Update car position and controls
-    function update() {
-        // Acceleration and braking
-        if (keys.D) velocity += 0.1;
-        if (keys.A) velocity -= 0.1;
-
-        // Cap the speed
-        if (velocity > maxSpeed) velocity = maxSpeed;
-        if (velocity < -maxSpeed) velocity = -maxSpeed;
-
-        // Burnout mode (if both keys pressed)
-        burnout = keys.A && keys.D;
-        if (burnout) {
-            velocity = 0;
-            emitSmoke();
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateCar();
+            drawCar();
+            requestAnimationFrame(gameLoop);
         }
 
-        // Apply friction
-        if (!keys.A && !keys.D && !burnout) {
-            if (velocity > 0) velocity -= friction;
-            if (velocity < 0) velocity += friction;
-        }
-
-        if (Math.abs(velocity) < 0.1) velocity = 0; // Stop the car if speed is low
-    }
-
-    // Emit smoke from tire position
-    function emitSmoke() {
-        const [smokeX, smokeY] = currentCar.tireSmokePos;
-        smokeParticles.push(new SmokeParticle(smokeX, smokeY));
-    }
-
-    // Draw the car and its components
-    function drawCar() {
-        const carX = canvas.width / 2 - currentCar.bodyScale[0] / 2;
-        const carY = canvas.height / 2 - currentCar.bodyScale[1] / 2;
-
-        // Body
-        ctx.drawImage(currentCar.body, carX, carY, currentCar.bodyScale[0], currentCar.bodyScale[1]);
-
-        // Rear wheel
-        ctx.drawImage(currentCar.rearwheel, carX + currentCar.rearwheelPos[0], carY + currentCar.rearwheelPos[1],
-            currentCar.wheelScale[0], currentCar.wheelScale[1]);
-
-        // Front wheel
-        ctx.drawImage(currentCar.frontwheel, carX + currentCar.frontwheelPos[0], carY + currentCar.frontwheelPos[1],
-            currentCar.wheelScale[0], currentCar.wheelScale[1]);
-    }
-
-    // Handle the smoke particles
-    function handleSmokeParticles() {
-        for (let particle of smokeParticles) {
-            particle.update();
-            particle.draw();
-        }
-    }
-
-    // Game loop
-    function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        update();
-        drawCar();
-        handleSmokeParticles();
-        requestAnimationFrame(gameLoop);
-    }
-
-    // Keydown and keyup event listeners
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'a' || e.key === 'A') keys.A = true;
-        if (e.key === 'd' || e.key === 'D') keys.D = true;
-    });
-
-    window.addEventListener('keyup', (e) => {
-        if (e.key === 'a' || e.key === 'A') keys.A = false;
-        if (e.key === 'd' || e.key === 'D') keys.D = false;
-    });
-
-    // Initialize game
-    loadCarData();
-    gameLoop();
-</script>
-
+        loadCarConfig("tesla");
+        gameLoop();
+    </script>
 </body>
 </html>
