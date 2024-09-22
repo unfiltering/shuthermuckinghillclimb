@@ -1,6 +1,6 @@
 {
     "carData": {
-        "tesla": {
+        "car": {
             "name": "tesla",
             "drivetrain": "RWD",
             "body": {
@@ -18,7 +18,7 @@
                 "scale": "53,53"
             }
         },
-        "mtruck": {
+        "monstertruck": {
             "name": "mtruck",
             "drivetrain": "AWD",
             "body": {
