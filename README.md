@@ -9,7 +9,8 @@ Have the HTML, CSS, and JS in one file.
 - Make sure the car doesnt emit the same smoke particle twice in a row
 - Make the particles emit from the car's tireSmokePos
 ## Info
-Cars images are gotten from "assets/images/veh/{carname}/{fileName}"
+- The cars data is gotten from "assets/data/cars.json"
+- Cars images are gotten from "assets/images/veh/{carname}/{fileName}"
 ### JSON Data
 ```json
 {
