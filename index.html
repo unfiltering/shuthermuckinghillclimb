@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D Car Simulation Game</title>
+    <title>2D Car Physics Game</title>
     <style>
-        body, html {
+        body {
             margin: 0;
-            padding: 0;
             overflow: hidden;
         }
+
         canvas {
-            background-color: #87CEEB; /* Light blue sky */
             display: block;
         }
     </style>
@@ -20,151 +19,130 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Initialize canvas and context
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Load car data from JSON
-        const carData = {
-            "carData": {
-                "tesla": {
-                    "name": "tesla",
-                    "drivetrain": "RWD",
-                    "tireSmokePos": "52,103",
-                    "body": {
-                        "image": "body.png",
-                        "scale": "357,106"
-                    },
-                    "rearwheel": {
-                        "image": "wheel.png",
-                        "position": "68,79",
-                        "scale": "53,53"
-                    },
-                    "frontwheel": {
-                        "image": "wheel.png",
-                        "position": "297,79",
-                        "scale": "53,53"
-                    }
-                },
-                "mtruck": {
-                    "name": "mtruck",
-                    "drivetrain": "AWD",
-                    "body": {
-                        "image": "body.png",
-                        "scale": "800,450"
-                    },
-                    "rearwheel": {
-                        "image": "wheel_r.png",
-                        "position": "68,79",
-                        "scale": "206,325"
-                    },
-                    "frontwheel": {
-                        "image": "wheel_f.png",
-                        "position": "297,79",
-                        "scale": "674,326"
-                    }
-                }
-            }
+        const keys = {
+            left: false,
+            right: false,
         };
 
-        let cars = [];
-        let activeCar = null;
-        let velocity = 0;
-        let acceleration = 0.05;
-        let friction = 0.02;
-        let maxSpeed = 5;
-        
-        // Load car images and initialize car objects
-        function loadCar(carConfig) {
-            let car = {
-                name: carConfig.name,
-                body: new Image(),
-                frontwheel: new Image(),
-                rearwheel: new Image(),
-                bodyScale: carConfig.body.scale.split(',').map(Number),
-                rearwheelPos: carConfig.rearwheel.position.split(',').map(Number),
-                frontwheelPos: carConfig.frontwheel.position.split(',').map(Number),
-                rearwheelScale: carConfig.rearwheel.scale.split(',').map(Number),
-                frontwheelScale: carConfig.frontwheel.scale.split(',').map(Number),
-                x: 100,
-                y: canvas.height - 200,
-                speed: 0
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "a" || e.key === "A") keys.left = true;
+            if (e.key === "d" || e.key === "D") keys.right = true;
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "a" || e.key === "A") keys.left = false;
+            if (e.key === "d" || e.key === "D") keys.right = false;
+        });
+
+        const carDataUrl = "assets/data/cars.json";
+        let carConfigs = null;
+        let currentCar = null;
+        let carPartsImages = {};
+
+        function loadCarConfig(carKey) {
+            fetch(carDataUrl)
+                .then(response => response.json())
+                .then(data => {
+                    carConfigs = data.carData;
+                    currentCar = carConfigs[carKey];
+                    if (currentCar) {
+                        loadCarImages();
+                    } else {
+                        console.error("Car config not found for key:", carKey);
+                    }
+                });
+        }
+
+        function loadCarImages() {
+            const carName = currentCar.name;
+            carPartsImages.body = new Image();
+            carPartsImages.body.src = `assets/images/veh/${carName}/${currentCar.body.image}`;
+
+            carPartsImages.rearwheel = new Image();
+            carPartsImages.rearwheel.src = `assets/images/veh/${carName}/${currentCar.rearwheel.image}`;
+
+            carPartsImages.frontwheel = new Image();
+            carPartsImages.frontwheel.src = `assets/images/veh/${carName}/${currentCar.frontwheel.image}`;
+        }
+
+        let car = {
+            x: 200,
+            y: 300,
+            speed: 0,
+            acceleration: 0.05,
+            friction: 0.01,
+            wheelRotation: 0, // Added to track wheel rotation
+            width: 100,
+            height: 50,
+            wheelCircumference: 53 * Math.PI // Assuming wheel scale gives diameter
+        };
+
+        function drawCar() {
+            if (!currentCar || !carPartsImages.body.complete) return;
+
+            const bodyPos = { x: car.x, y: car.y };
+            const rearWheelPos = { 
+                x: car.x + parseInt(currentCar.rearwheel.position.split(",")[0]),
+                y: car.y + parseInt(currentCar.rearwheel.position.split(",")[1])
             };
-            
-            car.body.src = `assets/images/veh/${carConfig.name}/${carConfig.body.image}`;
-            car.frontwheel.src = `assets/images/veh/${carConfig.name}/${carConfig.frontwheel.image}`;
-            car.rearwheel.src = `assets/images/veh/${carConfig.name}/${carConfig.rearwheel.image}`;
-            
-            return car;
+            const frontWheelPos = {
+                x: car.x + parseInt(currentCar.frontwheel.position.split(",")[0]),
+                y: car.y + parseInt(currentCar.frontwheel.position.split(",")[1])
+            };
+
+            const bodyScale = currentCar.body.scale.split(",");
+            const rearWheelScale = currentCar.rearwheel.scale.split(",");
+            const frontWheelScale = currentCar.frontwheel.scale.split(",");
+
+            // Draw Body
+            ctx.drawImage(carPartsImages.body, bodyPos.x, bodyPos.y, parseInt(bodyScale[0]), parseInt(bodyScale[1]));
+
+            // Draw Rear Wheel with rotation
+            ctx.save();
+            ctx.translate(rearWheelPos.x + parseInt(rearWheelScale[0]) / 2, rearWheelPos.y + parseInt(rearWheelScale[1]) / 2);
+            ctx.rotate(car.wheelRotation);
+            ctx.drawImage(carPartsImages.rearwheel, -parseInt(rearWheelScale[0]) / 2, -parseInt(rearWheelScale[1]) / 2, parseInt(rearWheelScale[0]), parseInt(rearWheelScale[1]));
+            ctx.restore();
+
+            // Draw Front Wheel with rotation
+            ctx.save();
+            ctx.translate(frontWheelPos.x + parseInt(frontWheelScale[0]) / 2, frontWheelPos.y + parseInt(frontWheelScale[1]) / 2);
+            ctx.rotate(car.wheelRotation);
+            ctx.drawImage(carPartsImages.frontwheel, -parseInt(frontWheelScale[0]) / 2, -parseInt(frontWheelScale[1]) / 2, parseInt(frontWheelScale[0]), parseInt(frontWheelScale[1]));
+            ctx.restore();
         }
 
-        // Load all cars
-        function loadCars() {
-            for (const carName in carData.carData) {
-                cars.push(loadCar(carData.carData[carName]));
+        function updateCar() {
+            if (keys.left) {
+                car.speed -= car.acceleration;
             }
-            // Set the first car as active
-            activeCar = cars[0];
+            if (keys.right) {
+                car.speed += car.acceleration;
+            }
+
+            // Apply friction
+            car.speed *= 1 - car.friction;
+            car.x += car.speed;
+
+            // Update wheel rotation based on speed
+            car.wheelRotation += (car.speed / car.wheelCircumference) * 2 * Math.PI; // Update rotation
         }
 
-        // Draw the car on the canvas
-        function drawCar(car) {
-            // Draw body
-            ctx.drawImage(car.body, car.x, car.y, car.bodyScale[0], car.bodyScale[1]);
-
-            // Draw rear wheel
-            ctx.drawImage(car.rearwheel, car.x + car.rearwheelPos[0], car.y + car.rearwheelPos[1], car.rearwheelScale[0], car.rearwheelScale[1]);
-
-            // Draw front wheel
-            ctx.drawImage(car.frontwheel, car.x + car.frontwheelPos[0], car.y + car.frontwheelPos[1], car.frontwheelScale[0], car.frontwheelScale[1]);
-        }
-
-        // Game loop for rendering and car physics
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Update car position based on speed
-            if (activeCar) {
-                activeCar.x += velocity;
-
-                // Apply friction
-                if (velocity > 0) {
-                    velocity -= friction;
-                } else if (velocity < 0) {
-                    velocity += friction;
-                }
-
-                // Draw the active car
-                drawCar(activeCar);
-            }
-
+            updateCar();
+            drawCar();
             requestAnimationFrame(gameLoop);
         }
 
-        // Control the car with keyboard
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyA') { // Accelerate
-                if (velocity > -maxSpeed) {
-                    velocity -= acceleration;
-                }
-            }
-            if (e.code === 'KeyD') { // Reverse
-                if (velocity < maxSpeed) {
-                    velocity += acceleration;
-                }
-            }
-        });
-
-        // Initialize game
-        function init() {
-            loadCars();
-            gameLoop();
-        }
-
-        // Start the game when the page is loaded
-        window.onload = init;
+        loadCarConfig("monstertruck"); // Change this to "monstertruck" to load the monster truck
+        gameLoop();
     </script>
 </body>
 </html>
