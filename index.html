@@ -53,6 +53,7 @@
                     currentCar = carConfigs[carKey];
                     if (currentCar) {
                         loadCarImages();
+                        initializeCar(); // Move initializeCar here
                     } else {
                         console.error("Car config not found for key:", carKey);
                     }
@@ -127,6 +128,14 @@
                 car.speed += car.acceleration;
             }
 
+            // Cap the speed
+            if (car.speed > currentCar.maxSpeed) {
+                car.speed = currentCar.maxSpeed;
+            }
+            if (car.speed < -currentCar.maxSpeed) {
+                car.speed = -currentCar.maxSpeed;
+            }
+
             // Apply friction
             car.speed *= 1 - car.friction;
             car.x += car.speed;
@@ -142,9 +151,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-
-        loadCarConfig("car"); // Load car data and initialize car properties
-        initializeCar();
+        loadCarConfig("car"); // Change to "monstertruck" for the other car
         gameLoop();
     </script>
 </body>
