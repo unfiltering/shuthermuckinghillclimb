@@ -14,21 +14,21 @@ fetch('assets/data/cars.json')
 let car;
 function initGame() {
     car = {
-        name: carData.tesla.name,
-        drivetrain: carData.tesla.drivetrain,
+        name: carData.car.name, // Change here
+        drivetrain: carData.car.drivetrain,
         body: {
             image: new Image(),
-            scale: carData.tesla.body.scale.split(',').map(Number)
+            scale: carData.car.body.scale.split(',').map(Number)
         },
         rearwheel: {
             image: new Image(),
-            position: carData.tesla.rearwheel.position.split(',').map(Number),
-            scale: carData.tesla.rearwheel.scale.split(',').map(Number)
+            position: carData.car.rearwheel.position.split(',').map(Number),
+            scale: carData.car.rearwheel.scale.split(',').map(Number)
         },
         frontwheel: {
             image: new Image(),
-            position: carData.tesla.frontwheel.position.split(',').map(Number),
-            scale: carData.tesla.frontwheel.scale.split(',').map(Number)
+            position: carData.car.frontwheel.position.split(',').map(Number),
+            scale: carData.car.frontwheel.scale.split(',').map(Number)
         },
         posX: canvas.width / 4,
         posY: canvas.height - 150,
