@@ -1,5 +1,5 @@
 ## Instruction
-Make me a 2D "HillClimb" style game in HTML, CSS, and JS with the following resources below.
+Make me a 2D car simulation game in HTML, CSS, and JS with the following resources below.
 Have the HTML, CSS, and JS in one file.
 ### Controls
 - A/D : Reverse/Accelerate
