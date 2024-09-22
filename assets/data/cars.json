@@ -27,7 +27,7 @@
             "maxSpeed": 12,
             "body": {
                 "image": "body.png",
-                "scale": "800,450"
+                "scale": "450,800"
             },
             "rearwheel": {
                 "image": "wheel_r.png",
