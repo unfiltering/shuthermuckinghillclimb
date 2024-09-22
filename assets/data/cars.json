@@ -1,44 +1,44 @@
 {
-    "carData": {
-        "car": {
-            "name": "tesla",
-            "drivetrain": "RWD",
-            "acceleration": 0.05,
-            "maxSpeed": 10,
-            "body": {
-                "image": "body.png",
-                "scale": "357,106"
-            },
-            "rearwheel": {
-                "image": "wheel.png",
-                "position": "68,79",
-                "scale": "53,53"
-            },
-            "frontwheel": {
-                "image": "wheel.png",
-                "position": "297,79",
-                "scale": "53,53"
+            "carData": {
+                "car": {
+                    "name": "tesla",
+                    "drivetrain": "RWD",
+                    "acceleration": 0.05,
+                    "maxSpeed": 10,
+                    "body": {
+                        "image": "body.png",
+                        "scale": "357,106"
+                    },
+                    "rearwheel": {
+                        "image": "wheel.png",
+                        "position": "42.5,55",
+                        "scale": "53,53"
+                    },
+                    "frontwheel": {
+                        "image": "wheel.png",
+                        "position": "272.25,55",
+                        "scale": "53,53"
+                    }
+                },
+                "monstertruck": {
+                    "name": "mtruck",
+                    "drivetrain": "AWD",
+                    "acceleration": 0.08,
+                    "maxSpeed": 12,
+                    "body": {
+                        "image": "body.png",
+                        "scale": "800,450"
+                    },
+                    "rearwheel": {
+                        "image": "wheel.png",
+                        "position": "80,202",
+                        "scale": "250,246"
+                    },
+                    "frontwheel": {
+                        "image": "wheel.png",
+                        "position": "550,202",
+                        "scale": "250,246"
+                    }
+                }
             }
-        },
-        "monstertruck": {
-            "name": "mtruck",
-            "drivetrain": "AWD",
-            "acceleration": 0.08,
-            "maxSpeed": 12,
-            "body": {
-                "image": "body.png",
-                "scale": "450,800"
-            },
-            "rearwheel": {
-                "image": "wheel_r.png",
-                "position": "68,79",
-                "scale": "250,246"
-            },
-            "frontwheel": {
-                "image": "wheel_f.png",
-                "position": "297,79",
-                "scale": "250,246"
-            }
-        }
-    }
 }

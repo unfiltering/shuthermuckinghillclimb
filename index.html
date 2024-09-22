@@ -40,29 +40,66 @@
             if (e.key === "d" || e.key === "D") keys.right = false;
         });
 
-        const carDataUrl = "assets/data/cars.json";
+        // Change this to false to use the hardcoded JSON
+        const useFetch = true;
+        const carDataUrl = "assets/data/cars.json"; // Path for fetching
         let carConfigs = null;
         let currentCar = null;
         let carPartsImages = {};
         let gameStarted = false;
 
-        function loadCarConfig(carKey) {
-            fetch(carDataUrl)
-                .then(response => response.json())
-                .then(data => {
-                    carConfigs = data.carData;
-                    currentCar = carConfigs[carKey];
-                    if (currentCar) {
-                        loadCarImages();
-                        initializeCar();
-                        if (!gameStarted) {
-                            gameStarted = true;
-                            gameLoop(); // Start the game loop after loading the car config
-                        }
-                    } else {
-                        console.error("Car config not found for key:", carKey);
+        const hardcodedCarData = {
+            "carData": {
+                "car": {
+                    "name": nil,
+                    "drivetrain": "RWD",
+                    "acceleration": 0.05,
+                    "maxSpeed": 10,
+                    "body": {
+                        "image": nil,
+                        "scale": "357,106"
+                    },
+                    "rearwheel": {
+                        "image": nil,
+                        "position": "42.5,55",
+                        "scale": "53,53"
+                    },
+                    "frontwheel": {
+                        "image": nil,
+                        "position": "272.25,55",
+                        "scale": "53,53"
                     }
-                });
+                }
+            }
+        };
+
+        function loadCarConfig(carKey) {
+            if (useFetch) {
+                fetch(carDataUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        carConfigs = data.carData;
+                        currentCar = carConfigs[carKey];
+                        initializeAndStartGame();
+                    });
+            } else {
+                carConfigs = hardcodedCarData.carData;
+                currentCar = carConfigs[carKey];
+                initializeAndStartGame();
+            }
+        }
+
+        function initializeAndStartGame() {
+            if (currentCar) {
+                loadCarImages();
+                initializeCar();
+                if (!gameStarted) {
+                    gameStarted = true;
+                    gameLoop(); // Start the game loop after loading the car config
+                }
+            } else {
+                console.error("Car config not found for key:", carKey);
+            }
         }
 
         function loadCarImages() {
@@ -158,7 +195,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        loadCarConfig("car"); // Change to "monstertruck" for the other car
+        loadCarConfig("monstertruck"); // Change to "monstertruck" for the other car
     </script>
 </body>
 </html>
