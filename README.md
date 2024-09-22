@@ -1,5 +1,6 @@
 ## Instruction
-Make me a 2D "HillClimb" style game with the following resources below.
+Make me a 2D "HillClimb" style game in HTML, CSS, and JS with the following resources below.
+Have the HTML, CSS, and JS in one file.
 ### Controls
 - A/D : Reverse/Accelerate
 ### Features
@@ -52,6 +53,25 @@ Cars images are gotten from "assets/images/veh/{carname}/{fileName}"
         }
     }
 }
+```
+## File Structure
+```plaintext
+├── index.html
+└── assets/
+        └── data/
+            └── cars.json
+        └── images/
+            ├── veh/
+                ├── smoke1.png
+                ├── smoke2.png
+                ├── smoke3.png
+                ├── tesla/
+                    ├── body.png
+                    └── wheel.png
+                └── mtruck/
+                    ├── body.png
+                    ├── wheel_r.png
+                    └── wheel_f.png
 ```
 ## File Structure
 ```plaintext
