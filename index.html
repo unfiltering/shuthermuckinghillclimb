@@ -44,6 +44,7 @@
         let carConfigs = null;
         let currentCar = null;
         let carPartsImages = {};
+        let gameStarted = false;
 
         function loadCarConfig(carKey) {
             fetch(carDataUrl)
@@ -53,7 +54,11 @@
                     currentCar = carConfigs[carKey];
                     if (currentCar) {
                         loadCarImages();
-                        initializeCar(); // Move initializeCar here
+                        initializeCar();
+                        if (!gameStarted) {
+                            gameStarted = true;
+                            gameLoop(); // Start the game loop after loading the car config
+                        }
                     } else {
                         console.error("Car config not found for key:", carKey);
                     }
@@ -121,6 +126,8 @@
         }
 
         function updateCar() {
+            if (!currentCar) return; // Prevents error if currentCar is not set
+
             if (keys.left) {
                 car.speed -= car.acceleration;
             }
@@ -152,7 +159,6 @@
         }
 
         loadCarConfig("car"); // Change to "monstertruck" for the other car
-        gameLoop();
     </script>
 </body>
 </html>
