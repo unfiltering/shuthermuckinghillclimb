@@ -23,17 +23,17 @@
             "drivetrain": "AWD",
             "body": {
                 "image": "body.png",
-                "scale": "357,106"
+                "scale": "800,450"
             },
             "rearwheel": {
                 "image": "wheel_r.png",
                 "position": "68,79",
-                "scale": "53,53"
+                "scale": "250,246"
             },
             "frontwheel": {
                 "image": "wheel_f.png",
                 "position": "297,79",
-                "scale": "53,53"
+                "scale": "250,246"
             }
         }
     }
