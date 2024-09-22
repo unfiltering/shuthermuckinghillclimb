@@ -19,7 +19,7 @@ const loadImages = () => {
 const loadCarData = async () => {
     const response = await fetch('assets/data/cars.json');
     carData = await response.json();
-    currentCar = carData.car.tesla; // Load the Tesla car data
+    currentCar = carData.car;
 };
 
 const drawCar = () => {
