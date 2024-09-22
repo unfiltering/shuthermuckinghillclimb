@@ -59,25 +59,6 @@ Have the HTML, CSS, and JS in one file.
 ```plaintext
 ├── index.html
 └── assets/
-        └── data/
-            └── cars.json
-        └── images/
-            ├── veh/
-                ├── smoke1.png
-                ├── smoke2.png
-                ├── smoke3.png
-                ├── tesla/
-                    ├── body.png
-                    └── wheel.png
-                └── mtruck/
-                    ├── body.png
-                    ├── wheel_r.png
-                    └── wheel_f.png
-```
-## File Structure
-```plaintext
-├── index.html
-└── assets/
         ├── game.js
         ├── styles.css
         └── data/
