@@ -3,6 +3,8 @@
         "car": {
             "name": "tesla",
             "drivetrain": "RWD",
+            "acceleration": 0.05,
+            "maxSpeed": 10,
             "body": {
                 "image": "body.png",
                 "scale": "357,106"
@@ -21,6 +23,8 @@
         "monstertruck": {
             "name": "mtruck",
             "drivetrain": "AWD",
+            "acceleration": 0.08,
+            "maxSpeed": 12,
             "body": {
                 "image": "body.png",
                 "scale": "800,450"

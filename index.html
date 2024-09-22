@@ -75,49 +75,51 @@
             x: 200,
             y: 300,
             speed: 0,
-            acceleration: 0.05,
             friction: 0.01,
-            gravity: 0.2, // Gravity force
-            rotation: 0, // Rotation angle in radians
-            wheelRotation: 0, // Track wheel rotation
+            wheelRotation: 0,
             width: 100,
             height: 50,
-            wheelCircumference: 53 * Math.PI // Assuming wheel scale gives diameter
+            wheelCircumference: 53 * Math.PI
         };
+
+        function initializeCar() {
+            car.acceleration = currentCar.acceleration;
+            car.maxSpeed = currentCar.maxSpeed;
+        }
 
         function drawCar() {
             if (!currentCar || !carPartsImages.body.complete) return;
 
             const bodyPos = { x: car.x, y: car.y };
+            const rearWheelPos = { 
+                x: car.x + parseInt(currentCar.rearwheel.position.split(",")[0]),
+                y: car.y + parseInt(currentCar.rearwheel.position.split(",")[1])
+            };
+            const frontWheelPos = {
+                x: car.x + parseInt(currentCar.frontwheel.position.split(",")[0]),
+                y: car.y + parseInt(currentCar.frontwheel.position.split(",")[1])
+            };
 
-            // Save the current context
-            ctx.save();
-            ctx.translate(bodyPos.x + car.width / 2, bodyPos.y + car.height / 2);
-            ctx.rotate(car.rotation); // Rotate the car based on its angle
-            ctx.drawImage(carPartsImages.body, -car.width / 2, -car.height / 2, car.width, car.height);
+            const bodyScale = currentCar.body.scale.split(",");
+            const rearWheelScale = currentCar.rearwheel.scale.split(",");
+            const frontWheelScale = currentCar.frontwheel.scale.split(",");
 
-            // Draw Rear Wheel with rotation
+            ctx.drawImage(carPartsImages.body, bodyPos.x, bodyPos.y, parseInt(bodyScale[0]), parseInt(bodyScale[1]));
+
             ctx.save();
-            ctx.translate(parseInt(currentCar.rearwheel.position.split(",")[0]), parseInt(currentCar.rearwheel.position.split(",")[1]));
-            ctx.rotate(car.wheelRotation + car.rotation); // Rotate wheel with car
-            ctx.drawImage(carPartsImages.rearwheel, -parseInt(currentCar.rearwheel.scale.split(",")[0]) / 2, -parseInt(currentCar.rearwheel.scale.split(",")[1]) / 2, parseInt(currentCar.rearwheel.scale.split(",")[0]), parseInt(currentCar.rearwheel.scale.split(",")[1]));
+            ctx.translate(rearWheelPos.x + parseInt(rearWheelScale[0]) / 2, rearWheelPos.y + parseInt(rearWheelScale[1]) / 2);
+            ctx.rotate(car.wheelRotation);
+            ctx.drawImage(carPartsImages.rearwheel, -parseInt(rearWheelScale[0]) / 2, -parseInt(rearWheelScale[1]) / 2, parseInt(rearWheelScale[0]), parseInt(rearWheelScale[1]));
             ctx.restore();
 
-            // Draw Front Wheel with rotation
             ctx.save();
-            ctx.translate(parseInt(currentCar.frontwheel.position.split(",")[0]), parseInt(currentCar.frontwheel.position.split(",")[1]));
-            ctx.rotate(car.wheelRotation + car.rotation); // Rotate wheel with car
-            ctx.drawImage(carPartsImages.frontwheel, -parseInt(currentCar.frontwheel.scale.split(",")[0]) / 2, -parseInt(currentCar.frontwheel.scale.split(",")[1]) / 2, parseInt(currentCar.frontwheel.scale.split(",")[0]), parseInt(currentCar.frontwheel.scale.split(",")[1]));
-            ctx.restore();
-
-            // Restore the original context
+            ctx.translate(frontWheelPos.x + parseInt(frontWheelScale[0]) / 2, frontWheelPos.y + parseInt(frontWheelScale[1]) / 2);
+            ctx.rotate(car.wheelRotation);
+            ctx.drawImage(carPartsImages.frontwheel, -parseInt(frontWheelScale[0]) / 2, -parseInt(frontWheelScale[1]) / 2, parseInt(frontWheelScale[0]), parseInt(frontWheelScale[1]));
             ctx.restore();
         }
 
         function updateCar() {
-            // Apply gravity
-            car.speed += car.gravity;
-
             if (keys.left) {
                 car.speed -= car.acceleration;
             }
@@ -131,13 +133,6 @@
 
             // Update wheel rotation based on speed
             car.wheelRotation += (car.speed / car.wheelCircumference) * 2 * Math.PI;
-
-            // Simulate rotation due to gravity
-            if (car.y + car.height < canvas.height) {
-                car.rotation += car.gravity / 200; // Adjust rotation speed if on the ground
-            } else {
-                car.rotation = Math.min(Math.PI / 4, car.rotation); // Limit rotation
-            }
         }
 
         function gameLoop() {
@@ -147,7 +142,9 @@
             requestAnimationFrame(gameLoop);
         }
 
-        loadCarConfig("monstertruck"); // Change this to "monstertruck" to load the monster truck
+
+        loadCarConfig("car"); // Load car data and initialize car properties
+        initializeCar();
         gameLoop();
     </script>
 </body>
