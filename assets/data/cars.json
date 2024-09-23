@@ -45,22 +45,22 @@
     "lambo": {
       "name": "lamborghini",
       "drivetrain": "AWD",
-      "acceleration": 0.2,
+      "acceleration": 0.249,
       "maxSpeed": 9999,
       "body": {
         "image": "body.png",
-        "position": "-200,-58",
-        "scale": "357,106"
+        "position": "-200,-48",
+        "scale": "386,100"
       },
       "rearwheel": {
         "image": "wheel.png",
-        "position": "42.5,55",
-        "scale": "53,53"
+        "position": "37.5,37",
+        "scale": "62,62"
       },
       "frontwheel": {
         "image": "wheel.png",
-        "position": "272.25,55",
-        "scale": "53,53"
+        "position": "273.45,39",
+        "scale": "60,60"
       }
     }
   }
