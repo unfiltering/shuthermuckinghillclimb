@@ -94,21 +94,30 @@
             carPartsImages.frontwheel.src = `assets/images/veh/${carName}/${currentCar.frontwheel.image}`;
         }
 
-        let car = {
-            x: 200,
-            y: 300,
-            speed: 0,
-            friction: 0.01,
-            wheelRotation: 0,
-            width: 100,
-            height: 50,
-            wheelCircumference: 53 * Math.PI
-        };
+let car = {
+    x: 200,
+    y: 300,
+    speed: 0,
+    friction: 0.01,
+    wheelRotation: 0,
+    width: 100,
+    height: 50,
+};
 
-        function initializeCar() {
-            car.acceleration = currentCar.acceleration;
-            car.maxSpeed = currentCar.maxSpeed;
-        }
+function initializeCar() {
+    car.acceleration = currentCar.acceleration;
+    car.maxSpeed = currentCar.maxSpeed;
+
+    // Calculate wheel circumference from size
+    const rearWheelSize = currentCar.rearwheel.size.split(",").map(Number);
+    const frontWheelSize = currentCar.frontwheel.size.split(",").map(Number);
+
+    // Assuming the size is given as width,height and using height as diameter
+    car.wheelCircumference = Math.PI * rearWheelSize[1]; // Using height (diameter) for rear wheels
+}
+
+// Update drawing code for wheels if needed
+
 
         function drawCar() {
             if (!currentCar || !carPartsImages.body.complete) return;
