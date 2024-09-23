@@ -40,7 +40,6 @@
             if (e.key === "d" || e.key === "D") keys.right = false;
         });
 
-        // Change this to false to use the hardcoded JSON
         const useFetch = true;
         const carDataUrl = "assets/data/cars.json"; // Path for fetching
         let carConfigs = null;
@@ -49,9 +48,9 @@
         let gameStarted = false;
 
         const hardcodedCarData = {
-            "carData": {
-            }
-        };
+  		"carData": {
+  		}
+	};
 
         function loadCarConfig(carKey) {
             if (useFetch) {
@@ -75,7 +74,7 @@
                 initializeCar();
                 if (!gameStarted) {
                     gameStarted = true;
-                    gameLoop(); // Start the game loop after loading the car config
+                    gameLoop();
                 }
             } else {
                 console.error("Car config not found for key:", carKey);
@@ -94,65 +93,90 @@
             carPartsImages.frontwheel.src = `assets/images/veh/${carName}/${currentCar.frontwheel.image}`;
         }
 
-let car = {
-    x: 200,
-    y: 300,
-    speed: 0,
-    friction: 0.01,
-    wheelRotation: 0,
-    width: 100,
-    height: 50,
-};
+        let car = {
+            x: 200,
+            y: canvas.height - 50 - 50, // Start at the bottom of the screen
+            speed: 0,
+            velocityY: 0,
+            friction: 0.01,
+            wheelRotation: 0,
+            width: 100,
+            height: 50,
+        };
 
-function initializeCar() {
-    car.acceleration = currentCar.acceleration;
-    car.maxSpeed = currentCar.maxSpeed;
+        const gravity = 0.5;
+        const groundLevel = canvas.height - 50; // Ground level remains the bottom of the canvas
 
-    // Calculate wheel circumference from size
-    const rearWheelSize = currentCar.rearwheel.size.split(",").map(Number);
-    const frontWheelSize = currentCar.frontwheel.size.split(",").map(Number);
+        // Define obstacles (blocks)
+        const blocks = [
+            { x: 100, y: groundLevel - 50, width: 200, height: 50 }, // Block 1
+            { x: 400, y: groundLevel - 100, width: 150, height: 50 }, // Block 2
+            { x: 600, y: groundLevel - 30, width: 300, height: 50 }, // Block 3
+        ];
 
-    // Assuming the size is given as width,height and using height as diameter
-    car.wheelCircumference = Math.PI * rearWheelSize[1]; // Using height (diameter) for rear wheels
+        // Camera settings
+        const camera = {
+            x: 0,
+            y: 0,
+            smoothness: 0.1, // Adjust for interpolation smoothness
+        };
+
+        function initializeCar() {
+            car.acceleration = currentCar.acceleration;
+            car.maxSpeed = currentCar.maxSpeed;
+            const rearWheelSize = currentCar.rearwheel.scale.split(",").map(Number);
+            car.wheelCircumference = Math.PI * rearWheelSize[1];
+        }
+
+function drawCar() {
+    if (!currentCar || !carPartsImages.body.complete) return;
+
+    // Calculate the body position using the car's current position
+    const bodyPos = {
+        x: car.x + parseFloat(currentCar.body.position.split(",")[0]) - camera.x,
+        y: car.y + parseFloat(currentCar.body.position.split(",")[1]) - camera.y,
+    };
+
+    const bodyScale = currentCar.body.scale.split(",");
+    ctx.drawImage(carPartsImages.body, bodyPos.x, bodyPos.y, parseInt(bodyScale[0]), parseInt(bodyScale[1]));
+
+    // Calculate wheel positions based on the body's position
+    const rearWheelPos = {
+        x: bodyPos.x + parseFloat(currentCar.rearwheel.position.split(",")[0]),
+        y: bodyPos.y + parseFloat(currentCar.rearwheel.position.split(",")[1]),
+    };
+
+    const frontWheelPos = {
+        x: bodyPos.x + parseFloat(currentCar.frontwheel.position.split(",")[0]),
+        y: bodyPos.y + parseFloat(currentCar.frontwheel.position.split(",")[1]),
+    };
+
+    // Draw rear wheel
+    ctx.save();
+    ctx.translate(rearWheelPos.x + parseInt(currentCar.rearwheel.scale.split(",")[0]) / 2, rearWheelPos.y + parseInt(currentCar.rearwheel.scale.split(",")[1]) / 2);
+    ctx.rotate(car.wheelRotation);
+    ctx.drawImage(carPartsImages.rearwheel, -parseInt(currentCar.rearwheel.scale.split(",")[0]) / 2, -parseInt(currentCar.rearwheel.scale.split(",")[1]) / 2, parseInt(currentCar.rearwheel.scale.split(",")[0]), parseInt(currentCar.rearwheel.scale.split(",")[1]));
+    ctx.restore();
+
+    // Draw front wheel
+    ctx.save();
+    ctx.translate(frontWheelPos.x + parseInt(currentCar.frontwheel.scale.split(",")[0]) / 2, frontWheelPos.y + parseInt(currentCar.frontwheel.scale.split(",")[1]) / 2);
+    ctx.rotate(car.wheelRotation);
+    ctx.drawImage(carPartsImages.frontwheel, -parseInt(currentCar.frontwheel.scale.split(",")[0]) / 2, -parseInt(currentCar.frontwheel.scale.split(",")[1]) / 2, parseInt(currentCar.frontwheel.scale.split(",")[0]), parseInt(currentCar.frontwheel.scale.split(",")[1]));
+    ctx.restore();
 }
 
-// Update drawing code for wheels if needed
 
 
-        function drawCar() {
-            if (!currentCar || !carPartsImages.body.complete) return;
-
-            const bodyPos = { x: car.x, y: car.y };
-            const rearWheelPos = { 
-                x: car.x + parseInt(currentCar.rearwheel.position.split(",")[0]),
-                y: car.y + parseInt(currentCar.rearwheel.position.split(",")[1])
-            };
-            const frontWheelPos = {
-                x: car.x + parseInt(currentCar.frontwheel.position.split(",")[0]),
-                y: car.y + parseInt(currentCar.frontwheel.position.split(",")[1])
-            };
-
-            const bodyScale = currentCar.body.scale.split(",");
-            const rearWheelScale = currentCar.rearwheel.scale.split(",");
-            const frontWheelScale = currentCar.frontwheel.scale.split(",");
-
-            ctx.drawImage(carPartsImages.body, bodyPos.x, bodyPos.y, parseInt(bodyScale[0]), parseInt(bodyScale[1]));
-
-            ctx.save();
-            ctx.translate(rearWheelPos.x + parseInt(rearWheelScale[0]) / 2, rearWheelPos.y + parseInt(rearWheelScale[1]) / 2);
-            ctx.rotate(car.wheelRotation);
-            ctx.drawImage(carPartsImages.rearwheel, -parseInt(rearWheelScale[0]) / 2, -parseInt(rearWheelScale[1]) / 2, parseInt(rearWheelScale[0]), parseInt(rearWheelScale[1]));
-            ctx.restore();
-
-            ctx.save();
-            ctx.translate(frontWheelPos.x + parseInt(frontWheelScale[0]) / 2, frontWheelPos.y + parseInt(frontWheelScale[1]) / 2);
-            ctx.rotate(car.wheelRotation);
-            ctx.drawImage(carPartsImages.frontwheel, -parseInt(frontWheelScale[0]) / 2, -parseInt(frontWheelScale[1]) / 2, parseInt(frontWheelScale[0]), parseInt(frontWheelScale[1]));
-            ctx.restore();
+        function drawBlocks() {
+            ctx.fillStyle = "brown";
+            blocks.forEach(block => {
+                ctx.fillRect(block.x - camera.x, block.y - camera.y, block.width, block.height); // Adjust position by camera
+            });
         }
 
         function updateCar() {
-            if (!currentCar) return; // Prevents error if currentCar is not set
+            if (!currentCar) return;
 
             if (keys.left) {
                 car.speed -= car.acceleration;
@@ -161,30 +185,58 @@ function initializeCar() {
                 car.speed += car.acceleration;
             }
 
-            // Cap the speed
-            if (car.speed > currentCar.maxSpeed) {
-                car.speed = currentCar.maxSpeed;
-            }
-            if (car.speed < -currentCar.maxSpeed) {
-                car.speed = -currentCar.maxSpeed;
-            }
+            car.speed = Math.max(-currentCar.maxSpeed, Math.min(car.speed, currentCar.maxSpeed));
 
-            // Apply friction
             car.speed *= 1 - car.friction;
             car.x += car.speed;
 
-            // Update wheel rotation based on speed
+            // Apply gravity
+            car.velocityY += gravity;
+            car.y += car.velocityY;
+
+            // Check for collisions with ground
+            checkCollisions();
+
+            // Check for collisions with blocks
+            checkBlockCollisions();
+
             car.wheelRotation += (car.speed / car.wheelCircumference) * 2 * Math.PI;
+
+            // Camera interpolation
+            camera.x += (car.x - camera.x - canvas.width / 2 + car.width / 2) * camera.smoothness; // Center the car in the camera
+            camera.y += (car.y - camera.y - canvas.height / 2 + car.height / 2) * camera.smoothness; // Center the car vertically
+        }
+
+        function checkCollisions() {
+            if (car.y + car.height > groundLevel) {
+                car.y = groundLevel - car.height;
+                car.velocityY = 0;
+            }
+        }
+
+        function checkBlockCollisions() {
+            blocks.forEach(block => {
+                if (
+                    car.x < block.x + block.width &&
+                    car.x + car.width > block.x &&
+                    car.y < block.y + block.height &&
+                    car.y + car.height > block.y
+                ) {
+                    car.y = block.y - car.height; // Place the car on top of the block
+                    car.velocityY = 0; // Reset vertical velocity
+                }
+            });
         }
 
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBlocks(); // Draw blocks first
             updateCar();
             drawCar();
             requestAnimationFrame(gameLoop);
         }
 
-        loadCarConfig("monstertruck"); // Change to "monstertruck" for the other car
+        loadCarConfig("car"); // Change to "monstertruck" for the other car
     </script>
 </body>
 </html>
